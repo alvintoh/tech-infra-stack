@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:14
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    environment:
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: prefect
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - prefect-network
+
+  prefect-server:
+    image: prefecthq/prefect:2-latest
+    ports:
+      - 4200:4200
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://postgres:changeme@postgres:5432/prefect
+      PREFECT_LOGGING_SERVER_LEVEL: INFO
+      PREFECT_SERVER_API_HOST: 0.0.0.0
+    command: ["prefect", "server", "start"]
+    depends_on:
+      - postgres
+    networks:
+      - prefect-network
+
+  prefect-agent:
+    image: prefecthq/prefect:2-latest
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    command: ["prefect", "agent", "start", "--pool", "default-agent-pool"]
+    depends_on:
+      - prefect-server
+    networks:
+      - prefect-network
+
+  prefect-runner:
+    image: prefecthq/prefect:2-latest
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+    volumes:
+      - ./flows:/opt/prefect/flows
+    command: /bin/bash -c "sleep 5 && python /opt/prefect/flows/prefect_flow.py && tail -f /dev/null"
+    depends_on:
+      - prefect-server
+      - prefect-agent
+    networks:
+      - prefect-network
+
+volumes:
+  db_data: null
+
+networks:
+  prefect-network:
+    driver: bridge
+    name: prefect-network

@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+
+  redis:
+    image: redis:alpine
+    profiles:
+      - cache_database
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+    command: redis-server --requirepass local-redis-pass
+    networks:
+      - clickhouse-network
+
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    profiles:
+      - cache_database
+      - database
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    volumes:
+      - ./clickhouse:/docker-entrypoint-initdb.d/
+    networks:
+      - clickhouse-network
+
+networks:
+  clickhouse-network:
+    driver: bridge
+    name: clickhouse-network

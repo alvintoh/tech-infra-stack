@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+
+  redis:
+    image: redis:alpine
+    profiles:
+      - cache_database
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+    command: redis-server --requirepass local-redis-pass
+    networks:
+      - postgres-network
+
+  postgres:
+    image: postgres:latest
+    profiles:
+      - cache_database
+      - database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: postgres
+    networks:
+      - postgres-network
+  
+  # ui for postgres
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    profiles:
+      - cache_database
+      - database
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'pgadmin4@pgadmin.org'
+      PGADMIN_DEFAULT_PASSWORD: 'admin'
+    depends_on:
+      - postgres
+    networks:
+      - postgres-network
+
+networks:
+  postgres-network:
+    driver: bridge
+    name: postgres-network
