@@ -54,7 +54,7 @@ Add into docker-compose command below to select cache with database or database 
 [x86 machines]
 docker-compose -f docker-compose/database/<service-name>/docker-compose-x86.yml up -d
 ```
-### 3.3 Running queue Services
+### 3.3 Running Queue Services
 
 To run the queue services, use the following command:
 
@@ -63,7 +63,7 @@ To run the queue services, use the following command:
 docker-compose -f docker-compose/queue/<service-name>/docker-compose-x86.yml up -d
 ```
 
-### 3.4 Running scheduler Services
+### 3.4 Running Scheduler Services
 
 To run the scheduler services, use the following command:
 
