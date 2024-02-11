@@ -8,7 +8,7 @@
    - [Running Locally](#31-running-locally)
    - [Running Database Services](#32-running-database-services)
    - [Running Queue Services](#33-running-queue-services)
-   - [Running Scheduler Services](#34-running-scheduler-services)
+   - [Running Orchestrator Services](#34-running-orchestrator-services)
 
 ## 1. Introduction
 
@@ -63,7 +63,7 @@ To run the queue services, use the following command:
 docker-compose -f docker-compose/queue/<service-name>/docker-compose-x86.yml up -d
 ```
 
-### 3.4 Running Scheduler Services
+### 3.4 Running Orchestrator Services
 
 To run the scheduler services, use the following command:
 
